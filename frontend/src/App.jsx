@@ -9,6 +9,8 @@ import Register from "./pages/Register";
 import AthleteList from "./pages/AthleteList";
 import AthleteForm from "./pages/AthleteForm";
 import AthleteDetail from "./pages/AthleteDetail";
+import MyProfile from "./pages/MyProfile";
+import RiskAssessment from "./pages/RiskAssessment";
 import VideoUpload from "./pages/VideoUpload";
 import VideoList from "./pages/VideoList";
 import VideoDetail from "./pages/VideoDetail";
@@ -19,7 +21,7 @@ function backdropVariant(pathname) {
   if (pathname === "/register") return "register";
   if (pathname === "/videos/upload") return "upload";
   if (pathname.startsWith("/videos")) return "videos";
-  if (pathname.startsWith("/athletes")) return "athletes";
+  if (pathname.startsWith("/athletes") || pathname === "/my-profile") return "athletes";
   return "app";
 }
 
@@ -44,6 +46,12 @@ export default function App() {
         } />
         <Route path="/athletes/:id/edit" element={
           <ProtectedRoute><AthleteForm /></ProtectedRoute>
+        } />
+        <Route path="/athletes/:id/risk-assessment" element={
+          <ProtectedRoute><RiskAssessment /></ProtectedRoute>
+        } />
+        <Route path="/my-profile" element={
+          <ProtectedRoute><MyProfile /></ProtectedRoute>
         } />
         <Route path="/videos" element={
           <ProtectedRoute><VideoList /></ProtectedRoute>

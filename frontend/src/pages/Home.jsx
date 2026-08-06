@@ -51,7 +51,9 @@ export default function Home() {
               <>
                 <p className="muted">Welcome back, <strong>{user.full_name}</strong> — {user.role.replace("_", " ")}</p>
                 <div className="hero-actions">
-                  <Link className="btn" to="/athletes">Athlete Profiles</Link>
+                  <Link className="btn" to={user.role === "athlete" ? "/my-profile" : "/athletes"}>
+                    {user.role === "athlete" ? "My Profile" : "Athlete Profiles"}
+                  </Link>
                   <Link className="btn btn-secondary" to="/videos">Movement Videos</Link>
                 </div>
               </>

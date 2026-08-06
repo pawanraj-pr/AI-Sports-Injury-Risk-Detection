@@ -49,6 +49,20 @@ export const api = {
   updateAthlete: (id, data) => request(`/athletes/${id}`, { method: "PUT", body: data }),
   deleteAthlete: (id) => request(`/athletes/${id}`, { method: "DELETE" }),
 
+  // Self-service athlete profile (athlete-role accounts managing their own record)
+  getMyAthlete: () => request("/athletes/me"),
+  createMyAthlete: (data) => request("/athletes/me", { method: "POST", body: data }),
+  updateMyAthlete: (data) => request("/athletes/me", { method: "PUT", body: data }),
+
+  // Combined / summary reports across all of an athlete's videos
+  getAthleteReportsSummary: (athleteId) => request(`/athletes/${athleteId}/reports/summary`),
+  downloadAthleteSummaryPdf: (athleteId) => downloadBlob(`/athletes/${athleteId}/reports/summary/pdf`),
+  downloadVideoReportPdf: (videoId) => downloadBlob(`/videos/${videoId}/report/pdf`),
+
+  // Injury Risk Prediction / Anomaly Detection / Recommendations (Milestone 3)
+  getRiskAssessment: (athleteId) => request(`/athletes/${athleteId}/risk-assessment`),
+  downloadRiskAssessmentPdf: (athleteId) => downloadBlob(`/athletes/${athleteId}/risk-assessment/pdf`),
+
   // Videos / Pose Estimation / Biomechanics (Milestone 2)
   uploadVideo: async (athleteId, activityType, file) => {
     const form = new FormData();
@@ -74,3 +88,30 @@ export const api = {
   getVideo: (id) => request(`/videos/${id}`),
   deleteVideo: (id) => request(`/videos/${id}`, { method: "DELETE" }),
 };
+
+// Fetches a PDF as a blob (auth'd) — separate from `request` since responses
+// here are binary, not JSON.
+async function downloadBlob(path) {
+  const token = getToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    let detail = "Could not generate PDF";
+    try { detail = (await res.json()).detail || detail; } catch (_) {}
+    throw new Error(detail);
+  }
+  return res.blob();
+}
+
+/** Triggers a browser "Save As" download for an already-fetched blob. */
+export function triggerDownload(blob, filename) {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
