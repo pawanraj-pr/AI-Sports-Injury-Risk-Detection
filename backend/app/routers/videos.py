@@ -3,13 +3,14 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, BackgroundTasks, Response
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
 from ..auth import get_current_user, require_roles
 from ..pose_analysis import process_video
+from ..report_pdf import build_video_report_pdf
 
 router = APIRouter(prefix="/videos", tags=["Video Upload, Pose Estimation & Biomechanical Analysis"])
 
@@ -169,6 +170,30 @@ def get_video(
     athlete = db.query(models.Athlete).filter(models.Athlete.id == video.athlete_id).first()
     _check_access(athlete, current_user)
     return video
+
+
+@router.get("/{video_id}/report/pdf")
+def download_video_report_pdf(
+    video_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    video = db.query(models.Video).filter(models.Video.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    athlete = db.query(models.Athlete).filter(models.Athlete.id == video.athlete_id).first()
+    _check_access(athlete, current_user)
+
+    if not video.report:
+        raise HTTPException(status_code=400, detail="This video hasn't been analyzed yet, or analysis failed")
+
+    pdf_bytes = build_video_report_pdf(video, video.report, athlete)
+    filename = f"{athlete.athlete_code}_video{video.id}_report.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)

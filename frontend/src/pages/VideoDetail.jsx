@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
-import { api } from "../api";
+import { api, triggerDownload } from "../api";
 import ScoreGauge from "../components/ScoreGauge";
 import PoseLoader from "../components/PoseLoader";
 
@@ -19,6 +19,8 @@ export default function VideoDetail() {
   const { id } = useParams();
   const [video, setVideo] = useState(null);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   const load = async () => {
     try {
@@ -52,6 +54,19 @@ export default function VideoDetail() {
     { name: "Symmetry", value: report.movement_symmetry_score },
     { name: "Knee Valgus (inv)", value: report.knee_valgus_score != null ? 100 - report.knee_valgus_score : null },
   ].filter((d) => d.value != null) : [];
+
+  const handleDownload = async () => {
+    setDownloadError("");
+    setDownloading(true);
+    try {
+      const blob = await api.downloadVideoReportPdf(video.id);
+      triggerDownload(blob, `${video.filename.replace(/\.[^.]+$/, "")}_report.pdf`);
+    } catch (err) {
+      setDownloadError(err.message);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="page fade-in">
@@ -92,6 +107,10 @@ export default function VideoDetail() {
                 joint alignment, balance, symmetry, and knee valgus indicators from the
                 pose estimation pass over this clip.
               </p>
+              <button onClick={handleDownload} disabled={downloading}>
+                {downloading ? "Generating..." : "Download PDF Report"}
+              </button>
+              {downloadError && <p className="error" style={{ marginTop: 10 }}>{downloadError}</p>}
             </div>
           </div>
 

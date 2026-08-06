@@ -19,7 +19,11 @@ export default function Navbar() {
       <div className="navbar-links">
         {user ? (
           <>
-            <Link to="/athletes">Athletes</Link>
+            {user.role === "athlete" ? (
+              <Link to="/my-profile">My Profile</Link>
+            ) : (
+              <Link to="/athletes">Athletes</Link>
+            )}
             <Link to="/videos">Videos</Link>
             <span className="navbar-user">
               {user.full_name} ({user.role})

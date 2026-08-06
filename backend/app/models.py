@@ -17,6 +17,22 @@ class RoleEnum(str, enum.Enum):
     admin = "admin"
 
 
+class InjurySeverityEnum(str, enum.Enum):
+    
+    none = "none"
+    mild = "mild"
+    moderate = "moderate"
+    severe = "severe"
+
+
+class TrainingLoadLevelEnum(str, enum.Enum):
+    
+    low = "low"
+    moderate = "moderate"
+    high = "high"
+    very_high = "very_high"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -34,7 +50,7 @@ class User(Base):
 
 
 class Athlete(Base):
-      
+    
     __tablename__ = "athletes"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -48,6 +64,10 @@ class Athlete(Base):
     weight_kg = Column(Float, nullable=False)
     injury_history = Column(Text, nullable=True)
     training_load = Column(String(120), nullable=True)
+
+    # Structured inputs for the Injury Risk Prediction Engine (Milestone 3)
+    injury_severity = Column(Enum(InjurySeverityEnum), nullable=False, default=InjurySeverityEnum.none)
+    training_load_level = Column(Enum(TrainingLoadLevelEnum), nullable=False, default=TrainingLoadLevelEnum.moderate)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

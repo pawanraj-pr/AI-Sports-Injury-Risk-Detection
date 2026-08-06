@@ -1,4 +1,3 @@
-
 import math
 import statistics
 from typing import List, Dict, Optional

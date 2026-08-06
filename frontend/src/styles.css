@@ -775,3 +775,59 @@ input:focus, select:focus, textarea:focus {
   90% { opacity: 0.25; }
   100% { opacity: 0; transform: translateY(-100vh) scale(0.6); }
 }
+
+/* =========================================================
+   Milestone 3: anomaly alerts + recommendation cards
+   ========================================================= */
+
+.anomaly-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid #F3D9C4;
+  background: #FDF3EC;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  color: #8A4B1E;
+}
+.anomaly-card svg { flex-shrink: 0; margin-top: 2px; color: #E8672A; }
+.anomaly-video { margin: 0 0 2px; font-weight: 600; font-size: 0.88rem; color: var(--ink); }
+.anomaly-card .muted { margin: 0; font-size: 0.85rem; }
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.recommendation-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+.recommendation-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.recommendation-category {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.recommendation-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
