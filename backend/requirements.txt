@@ -11,3 +11,5 @@ opencv-python-headless
 mediapipe
 numpy
 aiofiles
+fpdf2
+openpyxl

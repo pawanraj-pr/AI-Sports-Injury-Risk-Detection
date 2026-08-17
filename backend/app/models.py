@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import (
-    Column, Integer, String, Float, Text, DateTime, Enum, ForeignKey
+    Column, Integer, String, Float, Text, DateTime, Enum, ForeignKey, Boolean
 )
 from sqlalchemy.orm import relationship
 
@@ -13,8 +13,21 @@ class RoleEnum(str, enum.Enum):
     athlete = "athlete"
     coach = "coach"
     physiotherapist = "physiotherapist"
-    sports_scientist = "sports_scientist"
     admin = "admin"
+
+
+class InjurySeverityEnum(str, enum.Enum):
+    none = "none"
+    mild = "mild"
+    moderate = "moderate"
+    severe = "severe"
+
+
+class TrainingLoadLevelEnum(str, enum.Enum):
+    low = "low"
+    moderate = "moderate"
+    high = "high"
+    very_high = "very_high"
 
 
 class User(Base):
@@ -25,6 +38,9 @@ class User(Base):
     email = Column(String(120), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.athlete)
+    is_active = Column(Boolean, nullable=False, default=True)
+    login_count = Column(Integer, nullable=False, default=0)
+    last_login_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     athlete_profile = relationship(
@@ -34,7 +50,7 @@ class User(Base):
 
 
 class Athlete(Base):
-      
+   
     __tablename__ = "athletes"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -48,6 +64,10 @@ class Athlete(Base):
     weight_kg = Column(Float, nullable=False)
     injury_history = Column(Text, nullable=True)
     training_load = Column(String(120), nullable=True)
+
+    # Structured inputs for the Injury Risk Prediction Engine (Milestone 3)
+    injury_severity = Column(Enum(InjurySeverityEnum), nullable=False, default=InjurySeverityEnum.none)
+    training_load_level = Column(Enum(TrainingLoadLevelEnum), nullable=False, default=TrainingLoadLevelEnum.moderate)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -97,7 +117,7 @@ class Video(Base):
 
 
 class BiomechanicsReport(Base):
-    
+   
     __tablename__ = "biomechanics_reports"
 
     id = Column(Integer, primary_key=True, index=True)

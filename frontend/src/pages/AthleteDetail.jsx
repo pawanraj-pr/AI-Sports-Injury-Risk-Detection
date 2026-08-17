@@ -23,11 +23,12 @@ export default function AthleteDetail() {
         <p><strong>Age:</strong> {athlete.age}</p>
         <p><strong>Height:</strong> {athlete.height_cm} cm</p>
         <p><strong>Weight:</strong> {athlete.weight_kg} kg</p>
-        <p><strong>Training Load:</strong> {athlete.training_load || "-"}</p>
-        <p><strong>Injury History:</strong> {athlete.injury_history || "None recorded"}</p>
+        <p><strong>Training Load:</strong> {athlete.training_load || "-"} ({athlete.training_load_level?.replace("_", " ")})</p>
+        <p><strong>Injury History:</strong> {athlete.injury_history || "None recorded"} ({athlete.injury_severity})</p>
       </div>
       <div className="detail-actions">
-        <Link className="btn" to={`/videos/upload?athlete_id=${athlete.id}`}>Upload Movement Video</Link>
+        <Link className="btn" to={`/athletes/${athlete.id}/risk-assessment`}>View Injury Risk Assessment</Link>
+        <Link className="btn btn-secondary" to={`/videos/upload?athlete_id=${athlete.id}`}>Upload Movement Video</Link>
         <Link to="/athletes">&larr; Back to list</Link>
       </div>
     </div>

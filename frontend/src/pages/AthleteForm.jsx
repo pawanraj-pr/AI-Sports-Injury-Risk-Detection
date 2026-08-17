@@ -5,7 +5,11 @@ import { api } from "../api";
 const emptyForm = {
   athlete_code: "", sport_type: "", position: "", age: "",
   height_cm: "", weight_kg: "", injury_history: "", training_load: "",
+  injury_severity: "none", training_load_level: "moderate",
 };
+
+const INJURY_SEVERITY_OPTIONS = ["none", "mild", "moderate", "severe"];
+const TRAINING_LOAD_LEVEL_OPTIONS = ["low", "moderate", "high", "very_high"];
 
 export default function AthleteForm() {
   const { id } = useParams();
@@ -72,11 +76,22 @@ export default function AthleteForm() {
         <label>Weight (kg)</label>
         <input type="number" step="0.1" name="weight_kg" value={form.weight_kg} onChange={handleChange} required />
 
-        <label>Injury History</label>
+        <label>Injury History (notes)</label>
         <textarea name="injury_history" value={form.injury_history || ""} onChange={handleChange} rows={3} />
 
-        <label>Training Load</label>
-        <input name="training_load" value={form.training_load || ""} onChange={handleChange} />
+        <label>Injury Severity</label>
+        <select name="injury_severity" value={form.injury_severity} onChange={handleChange}>
+          {INJURY_SEVERITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <p className="muted" style={{ marginTop: 4 }}>Used by the Injury Risk Prediction Engine — pick the best match for this athlete's history.</p>
+
+        <label>Training Load (notes)</label>
+        <input name="training_load" value={form.training_load || ""} onChange={handleChange} placeholder="e.g. High — 6 sessions/week" />
+
+        <label>Training Load Level</label>
+        <select name="training_load_level" value={form.training_load_level} onChange={handleChange}>
+          {TRAINING_LOAD_LEVEL_OPTIONS.map((o) => <option key={o} value={o}>{o.replace("_", " ")}</option>)}
+        </select>
 
         <button type="submit" disabled={loading}>{loading ? "Saving..." : "Save"}</button>
       </form>

@@ -19,8 +19,18 @@ export default function Navbar() {
       <div className="navbar-links">
         {user ? (
           <>
-            <Link to="/athletes">Athletes</Link>
+            {user.role === "athlete" ? (
+              <Link to="/my-profile">My Profile</Link>
+            ) : (
+              <Link to="/athletes">Athletes</Link>
+            )}
             <Link to="/videos">Videos</Link>
+            {["coach", "physiotherapist", "admin"].includes(user.role) && (
+              <Link to="/team">Team Overview</Link>
+            )}
+            {user.role === "admin" && (
+              <Link to="/admin">Admin Dashboard</Link>
+            )}
             <span className="navbar-user">
               {user.full_name} ({user.role})
             </span>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 
-const MANAGE_ROLES = ["coach", "physiotherapist", "sports_scientist", "admin"];
+const MANAGE_ROLES = ["coach", "physiotherapist", "admin"];
 
 export default function AthleteList() {
   const [athletes, setAthletes] = useState([]);

@@ -34,7 +34,7 @@ LMK = mp_pose.PoseLandmark
 
 
 def process_video(filepath: str) -> Dict:
-    
+   
     cap = cv2.VideoCapture(filepath)
     if not cap.isOpened():
         raise RuntimeError("Could not open video file for processing")
