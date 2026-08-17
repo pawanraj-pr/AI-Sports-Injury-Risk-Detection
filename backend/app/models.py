@@ -50,7 +50,6 @@ class User(Base):
 
 
 class Athlete(Base):
-   
     __tablename__ = "athletes"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -94,7 +93,6 @@ class ActivityTypeEnum(str, enum.Enum):
 
 
 class Video(Base):
-    
     __tablename__ = "videos"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -117,7 +115,6 @@ class Video(Base):
 
 
 class BiomechanicsReport(Base):
-   
     __tablename__ = "biomechanics_reports"
 
     id = Column(Integer, primary_key=True, index=True)

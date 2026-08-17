@@ -63,6 +63,8 @@ class AthleteCreate(AthleteBase):
 
 
 class AthleteSelfCreate(AthleteBase):
+    """Used when an athlete creates their OWN profile — user_id is set
+    server-side from the logged-in account, never client-supplied."""
     pass
 
 

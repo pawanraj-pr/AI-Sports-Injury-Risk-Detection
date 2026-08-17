@@ -56,8 +56,7 @@ def _sorted_reports(reports_with_videos: List[Tuple[models.Video, models.Biomech
 # ---------- Component scores ----------
 
 def _biomechanical_deviation_score(reports):
-    """Higher when videos show lower movement quality (i.e. bigger
-    deviations from good technique)."""
+    
     quality_scores = [r.movement_quality_score for _, r in reports if r.movement_quality_score is not None]
     if not quality_scores:
         return 50.0  # no data yet — neutral default, not asserting risk either way

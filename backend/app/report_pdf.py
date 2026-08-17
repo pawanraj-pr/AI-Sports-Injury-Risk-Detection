@@ -1,11 +1,8 @@
-from datetime import datetime
 
 from fpdf import FPDF
 
 
 def _safe(text) -> str:
-    """Coerce to str and strip/replace any character fpdf2's core fonts
-    can't render, instead of letting it crash PDF generation."""
     if text is None:
         return "-"
     return str(text).encode("latin-1", "replace").decode("latin-1")
@@ -48,7 +45,6 @@ def _fmt(value, suffix=""):
 
 
 def _risk_rgb(category: str):
-    """Same risk-category color scale used on the website."""
     return {
         "Low": (30, 158, 90),
         "Moderate": (214, 154, 0),
@@ -58,8 +54,6 @@ def _risk_rgb(category: str):
 
 
 def _bar_row(pdf: FPDF, label: str, score, category: str, page_width: float, bar_h: float = 7.5):
-    """Draws one horizontal bar-chart row: label | filled bar (0-100) | value.
-    Mirrors the bar charts shown on the Risk Assessment web page."""
     label_w = page_width * 0.44
     bar_w = page_width * 0.36
     score_w = page_width - label_w - bar_w - 2
@@ -132,8 +126,7 @@ def build_video_report_pdf(video, report, athlete) -> bytes:
     pdf.set_text_color(120, 120, 120)
     _multicell(
         pdf, 0, 5,
-        "Note: metrics are derived from single-camera 2D pose estimation and are "
-        "simplified heuristics, not clinically validated biomechanical measurements.",
+        
     )
 
     return bytes(pdf.output())
@@ -196,9 +189,7 @@ def build_summary_report_pdf(athlete, reports_with_videos) -> bytes:
     pdf.set_text_color(120, 120, 120)
     _multicell(
         pdf, 0, 5,
-        "Note: this combined report averages simplified 2D pose-estimation heuristics "
-        "across all completed videos for this athlete. It is not a clinically validated "
-        "biomechanical assessment.",
+        
     )
 
     return bytes(pdf.output())
@@ -277,10 +268,7 @@ def build_risk_assessment_pdf(athlete, assessment: dict) -> bytes:
     pdf.set_text_color(120, 120, 120)
     _multicell(
         pdf, 0, 5,
-        "Note: this is a non-clinical, heuristic risk assessment derived from simplified "
-        "2D pose-estimation metrics, self-reported injury history, and training load. It "
-        "is not a medical diagnosis and does not replace evaluation by a qualified "
-        "physiotherapist or sports medicine physician.",
+        
     )
 
     return bytes(pdf.output())
