@@ -56,8 +56,7 @@ def _sorted_reports(reports_with_videos: List[Tuple[models.Video, models.Biomech
 # ---------- Component scores ----------
 
 def _biomechanical_deviation_score(reports):
-    """Higher when videos show lower movement quality (i.e. bigger
-    deviations from good technique)."""
+    
     quality_scores = [r.movement_quality_score for _, r in reports if r.movement_quality_score is not None]
     if not quality_scores:
         return 50.0  # no data yet — neutral default, not asserting risk either way
@@ -110,7 +109,7 @@ def _injury_categories(reports, athlete):
         categories.append({
             "name": "ACL Injury Risk",
             "score": score,
-            "note": "Driven by knee valgus and landing mechanics — the two most-cited "
+            "note": "Driven by knee valgus and landing mechanics - the two most-cited "
                     "biomechanical ACL risk factors in the sports-medicine literature.",
         })
     else:
@@ -175,6 +174,10 @@ def _injury_categories(reports, athlete):
 # ---------- Movement anomaly detection ----------
 
 def _detect_anomalies(reports):
+    """Flags individual videos that deviate sharply from the athlete's own
+    baseline (mean of their other completed videos) — surfacing
+    technique breakdowns or fatigue-driven decline rather than just
+    reporting a static per-video score."""
     anomalies = []
     if len(reports) < 2:
         return anomalies
@@ -191,7 +194,7 @@ def _detect_anomalies(reports):
                     "video_id": video.id, "filename": video.filename,
                     "description": (
                         f"Movement quality ({report.movement_quality_score}) dropped "
-                        f"notably below this athlete's baseline ({round(baseline, 1)}) — "
+                        f"notably below this athlete's baseline ({round(baseline, 1)}) - "
                         f"possible technique breakdown or fatigue."
                     ),
                 })
@@ -265,7 +268,7 @@ def _recommendations(components: dict, injury_categories: List[dict], athlete) -
 
     if not recs:
         recs.append({"category": "General",
-                      "text": "No significant risk factors detected in the current data — maintain "
+                      "text": "No significant risk factors detected in the current data - maintain "
                               "the current training and monitoring routine."})
 
     return recs
@@ -284,7 +287,7 @@ def build_risk_assessment(athlete, reports_with_videos: List[Tuple[models.Video,
             "injury_categories": [],
             "anomalies": [],
             "recommendations": [],
-            "message": "No completed video reports yet — upload and process at least one video "
+            "message": "No completed video reports yet - upload and process at least one video "
                        "to generate an injury risk assessment.",
             "generated_at": datetime.utcnow(),
         }

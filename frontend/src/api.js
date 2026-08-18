@@ -57,11 +57,20 @@ export const api = {
   // Combined / summary reports across all of an athlete's videos
   getAthleteReportsSummary: (athleteId) => request(`/athletes/${athleteId}/reports/summary`),
   downloadAthleteSummaryPdf: (athleteId) => downloadBlob(`/athletes/${athleteId}/reports/summary/pdf`),
+  downloadAthleteSummaryExcel: (athleteId) => downloadBlob(`/athletes/${athleteId}/reports/summary/excel`),
   downloadVideoReportPdf: (videoId) => downloadBlob(`/videos/${videoId}/report/pdf`),
 
   // Injury Risk Prediction / Anomaly Detection / Recommendations (Milestone 3)
   getRiskAssessment: (athleteId) => request(`/athletes/${athleteId}/risk-assessment`),
   downloadRiskAssessmentPdf: (athleteId) => downloadBlob(`/athletes/${athleteId}/risk-assessment/pdf`),
+
+  // Team Overview — coach / physiotherapist / admin (Milestone 4)
+  getTeamOverview: () => request("/athletes/team/overview"),
+
+  // Admin Dashboard (Milestone 4)
+  getAdminDashboard: () => request("/admin/dashboard"),
+  listAllUsers: () => request("/admin/users"),
+  toggleUserActive: (userId) => request(`/admin/users/${userId}/toggle-active`, { method: "PUT" }),
 
   // Videos / Pose Estimation / Biomechanics (Milestone 2)
   uploadVideo: async (athleteId, activityType, file) => {

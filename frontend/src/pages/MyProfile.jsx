@@ -22,6 +22,7 @@ export default function MyProfile() {
   const [saving, setSaving] = useState(false);
   const [summary, setSummary] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -101,6 +102,19 @@ export default function MyProfile() {
       setError(err.message);
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    setError("");
+    setDownloadingExcel(true);
+    try {
+      const blob = await api.downloadAthleteSummaryExcel(athlete.id);
+      triggerDownload(blob, `${athlete.athlete_code}_combined_report.xlsx`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDownloadingExcel(false);
     }
   };
 
@@ -218,9 +232,14 @@ export default function MyProfile() {
             Combined Report {summary?.video_count ? `— ${summary.video_count} video(s)` : ""}
           </h3>
           {summary?.video_count > 0 && (
-            <button onClick={handleDownloadSummary} disabled={downloading}>
-              {downloading ? "Generating..." : "Download Combined PDF"}
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleDownloadSummary} disabled={downloading}>
+                {downloading ? "Generating..." : "Download PDF"}
+              </button>
+              <button className="btn-secondary" onClick={handleDownloadExcel} disabled={downloadingExcel}>
+                {downloadingExcel ? "Generating..." : "Download Excel"}
+              </button>
+            </div>
           )}
         </div>
 

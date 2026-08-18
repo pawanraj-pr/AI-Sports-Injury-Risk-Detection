@@ -7,12 +7,14 @@ from .. import models, schemas
 from ..database import get_db
 from ..auth import get_current_user, require_roles
 from ..report_pdf import build_summary_report_pdf, build_risk_assessment_pdf
+from ..report_excel import build_summary_report_excel
 from ..risk_engine import build_risk_assessment
+from ..http_utils import safe_filename
 
 router = APIRouter(prefix="/athletes", tags=["Athlete Profile Management"])
 
 # Roles allowed to create/edit/delete athlete records ON BEHALF OF SOMEONE ELSE
-MANAGE_ROLES = ["coach", "physiotherapist", "sports_scientist", "admin"]
+MANAGE_ROLES = ["coach", "physiotherapist", "admin"]
 
 
 def _check_access(athlete: models.Athlete, current_user: models.User):
@@ -158,11 +160,43 @@ def download_reports_summary_pdf(
     if not reports:
         raise HTTPException(status_code=400, detail="No completed reports available yet to generate a combined PDF")
 
-    pdf_bytes = build_summary_report_pdf(athlete, reports)
-    filename = f"{athlete.athlete_code}_combined_report.pdf"
+    try:
+        pdf_bytes = build_summary_report_pdf(athlete, reports)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+
+    filename = safe_filename(f"{athlete.athlete_code}_combined_report.pdf")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{athlete_id}/reports/summary/excel")
+def download_reports_summary_excel(
+    athlete_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    athlete = db.query(models.Athlete).filter(models.Athlete.id == athlete_id).first()
+    if not athlete:
+        raise HTTPException(status_code=404, detail="Athlete not found")
+    _check_access(athlete, current_user)
+
+    reports = _completed_reports_for(athlete_id, db)
+    if not reports:
+        raise HTTPException(status_code=400, detail="No completed reports available yet to generate an Excel report")
+
+    try:
+        excel_bytes = build_summary_report_excel(athlete, reports)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Excel generation failed: {e}")
+
+    filename = safe_filename(f"{athlete.athlete_code}_combined_report.xlsx")
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
@@ -203,13 +237,64 @@ def download_risk_assessment_pdf(
     if assessment["video_count"] == 0:
         raise HTTPException(status_code=400, detail="No completed reports available yet to assess risk")
 
-    pdf_bytes = build_risk_assessment_pdf(athlete, assessment)
-    filename = f"{athlete.athlete_code}_risk_assessment.pdf"
+    try:
+        pdf_bytes = build_risk_assessment_pdf(athlete, assessment)
+    except Exception as e:
+        # Never let a PDF-rendering bug surface as an unexplained network
+        # failure on the frontend — always return a proper, readable error.
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+
+    filename = safe_filename(f"{athlete.athlete_code}_risk_assessment.pdf")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# =========================================================
+# Team Overview — Coach / Physiotherapist / Admin dashboard
+# (spec: "Coach Dashboard - Team risk overview",
+#  "Physiotherapist Dashboard - Injury risk monitoring")
+# =========================================================
+
+@router.get("/team/overview", response_model=List[schemas.TeamOverviewEntry])
+def get_team_overview(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_roles(MANAGE_ROLES)),
+):
+    athletes = db.query(models.Athlete).all()
+    entries = []
+    for athlete in athletes:
+        videos = db.query(models.Video).filter(
+            models.Video.athlete_id == athlete.id,
+            models.Video.status == models.VideoStatusEnum.completed,
+        ).order_by(models.Video.uploaded_at.desc()).all()
+        reports = [(v, v.report) for v in videos if v.report]
+
+        latest_score = reports[0][1].movement_quality_score if reports else None
+        latest_risk = reports[0][1].risk_category if reports else None
+
+        needs_attention = (
+            athlete.injury_severity in [models.InjurySeverityEnum.moderate, models.InjurySeverityEnum.severe]
+            or (latest_risk in ["High", "Critical"])
+        )
+
+        entries.append(schemas.TeamOverviewEntry(
+            athlete_id=athlete.id,
+            athlete_code=athlete.athlete_code,
+            sport_type=athlete.sport_type,
+            injury_severity=athlete.injury_severity,
+            training_load_level=athlete.training_load_level,
+            video_count=len(reports),
+            latest_movement_quality_score=latest_score,
+            latest_risk_category=latest_risk,
+            needs_attention=needs_attention,
+        ))
+
+    # Athletes needing attention float to the top.
+    entries.sort(key=lambda e: (not e.needs_attention, e.athlete_code))
+    return entries
 
 
 # =========================================================

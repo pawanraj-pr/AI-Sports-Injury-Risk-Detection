@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 
-const ROLES = ["athlete", "coach", "physiotherapist", "sports_scientist", "admin"];
+const ROLES = ["athlete", "coach", "physiotherapist", "admin"];
 
 export default function Register() {
   const [form, setForm] = useState({

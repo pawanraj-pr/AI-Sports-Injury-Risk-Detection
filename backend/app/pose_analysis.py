@@ -8,7 +8,9 @@ import mediapipe as mp
 
 mp_pose = mp.solutions.pose
 
-
+# We sample every Nth frame instead of every frame — keeps processing time
+# reasonable for a demo/local-run environment while still capturing the
+# movement pattern across the clip.
 FRAME_SAMPLE_RATE = 3
 
 
@@ -33,7 +35,11 @@ LMK = mp_pose.PoseLandmark
 
 
 def process_video(filepath: str) -> Dict:
-    
+    """
+    Runs MediaPipe Pose over the video, collects per-frame joint metrics,
+    and returns an aggregated biomechanical summary dict ready to store on
+    a BiomechanicsReport row.
+    """
     cap = cv2.VideoCapture(filepath)
     if not cap.isOpened():
         raise RuntimeError("Could not open video file for processing")

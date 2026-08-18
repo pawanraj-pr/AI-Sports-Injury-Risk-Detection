@@ -39,6 +39,7 @@ export default function RiskAssessment() {
   const [assessment, setAssessment] = useState(null);
   const [athlete, setAthlete] = useState(null);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -59,13 +60,13 @@ export default function RiskAssessment() {
   }, [id]);
 
   const handleDownload = async () => {
-    setError("");
+    setDownloadError("");
     setDownloading(true);
     try {
       const blob = await api.downloadRiskAssessmentPdf(id);
       triggerDownload(blob, `${athlete.athlete_code}_risk_assessment.pdf`);
     } catch (err) {
-      setError(err.message);
+      setDownloadError(err.message);
     } finally {
       setDownloading(false);
     }
@@ -116,6 +117,13 @@ export default function RiskAssessment() {
               <button onClick={handleDownload} disabled={downloading}>
                 {downloading ? "Generating..." : "Download PDF Report"}
               </button>
+              {downloadError && (
+                <p className="error" style={{ marginTop: 10 }}>
+                  {downloadError === "Failed to fetch"
+                    ? "Could not reach the backend server. Confirm it's running at http://127.0.0.1:8000 and try again."
+                    : downloadError}
+                </p>
+              )}
             </div>
           </div>
 

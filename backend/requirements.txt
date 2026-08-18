@@ -12,3 +12,4 @@ mediapipe
 numpy
 aiofiles
 fpdf2
+openpyxl

@@ -11,10 +11,11 @@ from ..database import get_db
 from ..auth import get_current_user, require_roles
 from ..pose_analysis import process_video
 from ..report_pdf import build_video_report_pdf
+from ..http_utils import safe_filename
 
 router = APIRouter(prefix="/videos", tags=["Video Upload, Pose Estimation & Biomechanical Analysis"])
 
-MANAGE_ROLES = ["coach", "physiotherapist", "sports_scientist", "admin"]
+MANAGE_ROLES = ["coach", "physiotherapist", "admin"]
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
 UPLOAD_DIR = os.path.abspath(UPLOAD_DIR)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -187,8 +188,12 @@ def download_video_report_pdf(
     if not video.report:
         raise HTTPException(status_code=400, detail="This video hasn't been analyzed yet, or analysis failed")
 
-    pdf_bytes = build_video_report_pdf(video, video.report, athlete)
-    filename = f"{athlete.athlete_code}_video{video.id}_report.pdf"
+    try:
+        pdf_bytes = build_video_report_pdf(video, video.report, athlete)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+
+    filename = safe_filename(f"{athlete.athlete_code}_video{video.id}_report.pdf")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

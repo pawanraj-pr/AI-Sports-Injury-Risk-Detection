@@ -25,6 +25,9 @@ class UserOut(BaseModel):
     full_name: str
     email: EmailStr
     role: RoleEnum
+    is_active: bool
+    login_count: int
+    last_login_at: Optional[datetime] = None
     created_at: datetime
 
 
@@ -60,6 +63,8 @@ class AthleteCreate(AthleteBase):
 
 
 class AthleteSelfCreate(AthleteBase):
+    """Used when an athlete creates their OWN profile — user_id is set
+    server-side from the logged-in account, never client-supplied."""
     pass
 
 
@@ -189,3 +194,66 @@ class AthleteRiskAssessment(BaseModel):
     recommendations: List[Recommendation] = []
     message: Optional[str] = None
     generated_at: datetime
+
+
+# ---------- Admin Dashboard / Executive Analytics (Milestone 4) ----------
+
+class RoleCount(BaseModel):
+    role: str
+    count: int
+
+
+class StatusCount(BaseModel):
+    status: str
+    count: int
+
+
+class RecentUser(BaseModel):
+    id: int
+    full_name: str
+    email: EmailStr
+    role: RoleEnum
+    created_at: datetime
+
+
+class AdminDashboard(BaseModel):
+    total_users: int
+    users_by_role: List[RoleCount]
+    total_logins: int
+    logins_by_role: List[RoleCount]
+    active_users: int
+    inactive_users: int
+    total_athletes: int
+    total_videos: int
+    videos_by_status: List[StatusCount]
+    total_processed_reports: int
+    avg_platform_movement_quality: Optional[float] = None
+    high_risk_video_count: int
+    recent_users: List[RecentUser] = []
+
+
+class UserAdminOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    full_name: str
+    email: EmailStr
+    role: RoleEnum
+    is_active: bool
+    login_count: int
+    last_login_at: Optional[datetime] = None
+    created_at: datetime
+
+
+# ---------- Team Overview (Coach / Physiotherapist / Admin) ----------
+
+class TeamOverviewEntry(BaseModel):
+    athlete_id: int
+    athlete_code: str
+    sport_type: str
+    injury_severity: InjurySeverityEnum
+    training_load_level: TrainingLoadLevelEnum
+    video_count: int
+    latest_movement_quality_score: Optional[float] = None
+    latest_risk_category: Optional[str] = None
+    needs_attention: bool
